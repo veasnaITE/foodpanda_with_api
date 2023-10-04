@@ -5,6 +5,10 @@ import 'package:foodpanda_clone/insert_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 class RestaurantForm extends StatefulWidget {
+  final refreshCallback;
+  RestaurantForm({
+    super.key, required this.refreshCallback,
+});
   @override
   _RestaurantFormState createState() => _RestaurantFormState();
 }
@@ -109,6 +113,7 @@ class _RestaurantFormState extends State<RestaurantForm> {
         images = null;
       });
     }
+    Navigator.popUntil(context, ModalRoute.withName('/'));
   }
 
   @override

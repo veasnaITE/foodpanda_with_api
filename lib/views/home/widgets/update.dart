@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:foodpanda_clone/insert_model.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 class UpdateRestaurantForm extends StatefulWidget {
-  final int id;
-  const UpdateRestaurantForm(this.id, {super.key});
+  final item;
+  final idpass;
+  UpdateRestaurantForm({required this.item, required this.idpass,super.key});
   @override
   _UpdateRestaurantForm createState() => _UpdateRestaurantForm();
 }
@@ -19,6 +20,15 @@ class _UpdateRestaurantForm extends State<UpdateRestaurantForm> {
   TextEditingController discountController = TextEditingController();
   TextEditingController deliveryFeeController = TextEditingController();
   TextEditingController deliveryTimeController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    nameController.text = widget.item?.name;
+    categoryController.text=widget.item?.category;
+    discountController.text=widget.item!.discount.toString();
+    deliveryFeeController.text=widget.item!.deliveryFee.toString();
+    deliveryTimeController.text=widget.item!.deliveryTime.toString();
+  }
 
   File? images;
 
@@ -51,14 +61,14 @@ class _UpdateRestaurantForm extends State<UpdateRestaurantForm> {
       return id;
     } else {
       print('API request failed');
-      return 0;
+      return widget.item?.picture?.id;
     }
   }
   Future<void> inSertData (jsonData) async{
     var headers = {
       'Content-Type': 'application/json'
     };
-    var requests = http.Request('PUT', Uri.parse('https://cms.istad.co/api/food-panda-restaurants/${widget.id}'));
+    var requests = http.Request('PUT', Uri.parse('https://cms.istad.co/api/food-panda-restaurants/${widget.idpass}'));
     requests.body =jsonData;
     requests.headers.addAll(headers);
     http.StreamedResponse responses = await requests.send();
@@ -110,6 +120,7 @@ class _UpdateRestaurantForm extends State<UpdateRestaurantForm> {
       setState(() {
         images = null;
       });
+      Navigator.of(context).pop();
     }
   }
 
@@ -208,7 +219,7 @@ class _UpdateRestaurantForm extends State<UpdateRestaurantForm> {
               const SizedBox(height: 16.0),
               images != null
                   ? Image.file(images!)
-                  : const Icon(Icons.image, size: 100),
+                  : Image.network('https://cms.istad.co${widget.item?.picture?.data?.attributes?.url}'),
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: submitForm,
