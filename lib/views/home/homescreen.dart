@@ -285,7 +285,7 @@ late Future<CuisinesModel> futureCuisines;
                 height: 80,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.black12, width: 2.0)),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.0)),
                 child: Row(
                   children: [
                     const SizedBox(width: 10,),
@@ -316,7 +316,7 @@ late Future<CuisinesModel> futureCuisines;
                 height: 80,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.black12, width: 2.0)),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.0)),
                 child: Row(
                   children: [
                     const SizedBox(width: 10,),
@@ -347,7 +347,7 @@ late Future<CuisinesModel> futureCuisines;
                 height: 80,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.black12, width: 2.0)),
+                    border: Border.all(color: Colors.grey.shade300, width: 1.0)),
                 child: Row(
                   children: [
                     const SizedBox(width: 10,),
@@ -361,7 +361,7 @@ late Future<CuisinesModel> futureCuisines;
                           ),
                           TextSpan(text: "\nwhen you refer a friend",
                             style: TextStyle(
-                                color: Colors.black87, fontSize: 18),),
+                                color: Colors.black54, fontSize: 18),),
                         ])),
                     const Spacer(),
                     Image.asset('assets/images/gift.png'),

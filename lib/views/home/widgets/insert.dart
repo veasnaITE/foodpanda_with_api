@@ -113,6 +113,7 @@ class _RestaurantFormState extends State<RestaurantForm> {
         images = null;
       });
     }
+    widget.refreshCallback;
     Navigator.popUntil(context, ModalRoute.withName('/'));
   }
 

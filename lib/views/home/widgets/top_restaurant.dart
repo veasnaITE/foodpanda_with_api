@@ -94,7 +94,7 @@ class _TopRestaurantState extends State<TopRestaurant> {
           margin: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: Colors.black12,
+            color: Colors.grey.shade200,
           ),
           child: SizedBox(
             width: MediaQuery.of(context).size.width * .9,
