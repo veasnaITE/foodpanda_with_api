@@ -1,17 +1,15 @@
 
 import 'dart:convert';
 
-RestaurantInsertModel restaurantInsertModelFromJson(String str) => RestaurantInsertModel.fromJson(json.decode(str));
-
-String restaurantInsertModelToJson(RestaurantInsertModel data) => json.encode(data.toJson());
-
-class RestaurantInsertModel {
+RestaurantResponse restaurantInsertModelFromJson(String str) => RestaurantResponse.fromJson(json.decode(str));
+String restaurantInsertModelToJson(RestaurantResponse data) => json.encode(data.toJson());
+class RestaurantResponse {
   Data? data;
-  RestaurantInsertModel({
+  RestaurantResponse({
     this.data,
   });
 
-  factory RestaurantInsertModel.fromJson(Map<String, dynamic> json) => RestaurantInsertModel(
+  factory RestaurantResponse.fromJson(Map<String, dynamic> json) => RestaurantResponse(
     data: json["data"] == null ? null : Data.fromJson(json["data"]),
   );
 
@@ -27,7 +25,6 @@ class Data {
   double? deliveryFee;
   int? deliveryTime;
   String? picture;
-
   Data({
     this.name,
     this.category,

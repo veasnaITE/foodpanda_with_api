@@ -1,14 +1,13 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:foodpanda_clone/insert_model.dart';
+import 'package:foodpanda_clone/data/response/status.dart';
+import 'package:foodpanda_clone/viewmodels/image_viewmodel.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+
 class RestaurantForm extends StatefulWidget {
-  final refreshCallback;
-  RestaurantForm({
-    super.key, required this.refreshCallback,
-});
+  RestaurantForm({super.key});
   @override
   _RestaurantFormState createState() => _RestaurantFormState();
 }
@@ -20,57 +19,34 @@ class _RestaurantFormState extends State<RestaurantForm> {
   TextEditingController discountController = TextEditingController();
   TextEditingController deliveryFeeController = TextEditingController();
   TextEditingController deliveryTimeController = TextEditingController();
-
   File? images;
+  var imageViewModel = ImageViewModel();
+  _getImageFromSource(type) async {
+    var pickedFile = await ImagePicker().pickImage(
+        source: type == 'camera' ? ImageSource.camera : ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        images = File(pickedFile.path);
+      });
+      imageViewModel.uploadImage(pickedFile.path);
+    }
+  }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final pickedImage = await ImagePicker().pickImage(source: source);
-    setState(() {
-      if (pickedImage != null) {
-        images = File(pickedImage.path);
-      } else {
-        print('No image selected.');
-      }
-    });
-  }
-  Future<int> uploadImage (path) async{
-    var request = http.MultipartRequest('POST', Uri.parse('https://cms.istad.co/api/upload'));
-    // Add the image file to the request
-    if (images != null) {
-      request.files.add(await http.MultipartFile.fromPath('files', path));
-    }
-    // Send the request and handle the response
-    var response = await request.send();
-    if (response.statusCode == 200) {
-      print('API request successful');
-      var responseBody = await response.stream.bytesToString();
-      var parsedResponse = jsonDecode(responseBody);
-      int id = parsedResponse[0]['id'];
-      print('The ID is: $id');
-      print(responseBody);
-      return id;
-    } else {
-      print('API request failed');
-      return 0;
-    }
-  }
-  Future<void> inSertData (jsonData) async{
-    var headers = {
-      'Content-Type': 'application/json'
-    };
-    var requests = http.Request('POST', Uri.parse('https://cms.istad.co/api/food-panda-restaurants'));
-    requests.body =jsonData;
+  Future<void> inSertData(jsonData) async {
+    var headers = {'Content-Type': 'application/json'};
+    var requests = http.Request(
+        'POST', Uri.parse('https://cms.istad.co/api/food-panda-restaurants'));
+    requests.body = jsonData;
     requests.headers.addAll(headers);
     http.StreamedResponse responses = await requests.send();
     if (responses.statusCode == 200) {
       print(await responses.stream.bytesToString());
-    }
-    else {
+    } else {
       print(responses.reasonPhrase);
     }
   }
 
-  void submitForm() async{
+  void submitForm() async {
     if (_formKey.currentState!.validate()) {
       // Retrieve the form field values from the controllers
       String name = nameController.text;
@@ -80,28 +56,24 @@ class _RestaurantFormState extends State<RestaurantForm> {
       int deliveryTime = int.parse(deliveryTimeController.text);
 
       // You can perform further actions with the form data and the selected image here
-      //posting Image
-      var id = await uploadImage(images!.path);
+
       //positing restaurant
-      RestaurantInsertModel restaurantData = RestaurantInsertModel(
-        data: Data(
-          name: name,
-          category: category,
-          discount: discount,
-          deliveryFee: deliveryFee,
-          deliveryTime: deliveryTime,
-          picture: "$id",
-        ),
-      );
-      String jsonData = restaurantInsertModelToJson(restaurantData);
-      print(jsonData);
-
-      //call insertData
-      inSertData(jsonData);
-
+      // RestaurantInsertModel restaurantData = RestaurantInsertModel(
+      //   data: Data(
+      //     name: name,
+      //     category: category,
+      //     discount: discount,
+      //     deliveryFee: deliveryFee,
+      //     deliveryTime: deliveryTime,
+      //     picture: "$imageId",
+      //   ),
+      // );
+      // String jsonData = restaurantInsertModelToJson(restaurantData);
+      //  print(jsonData);
+      //  //call insertData
+      //  inSertData(jsonData);
       // Reset the form
       _formKey.currentState!.reset();
-
       // Clear the text field controllers
       nameController.clear();
       categoryController.clear();
@@ -109,11 +81,7 @@ class _RestaurantFormState extends State<RestaurantForm> {
       deliveryFeeController.clear();
       deliveryTimeController.clear();
       // Clear the image selection
-      setState(() {
-        images = null;
-      });
     }
-    widget.refreshCallback;
     Navigator.popUntil(context, ModalRoute.withName('/'));
   }
 
@@ -206,13 +174,33 @@ class _RestaurantFormState extends State<RestaurantForm> {
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
-                onPressed: () => _pickImage(ImageSource.gallery),
+                onPressed: () => _getImageFromSource('gallery'),
                 child: const Text('Select Image'),
               ),
-              const SizedBox(height: 16.0),
-              images != null
-                  ? Image.file(images!)
-                  : const Icon(Icons.image, size: 100),
+              ChangeNotifierProvider(
+                create: (context)=>imageViewModel,
+                child: Consumer<ImageViewModel>(
+                  builder: (context,viewModel,_){
+
+                    switch(viewModel.response.status){
+                      case Status.LOADING:
+                        return Center( child: CircularProgressIndicator(),);
+                      case Status.COMPlETED:
+                        print("image id ${viewModel.response.data}");
+                        return Container(
+                          width: 250,
+                          height: 250,
+                          color: Colors.blue,
+                          child: images == null
+                              ? Image.asset('assets/images/cofee1.webp')
+                              : Image.file(images!),
+                        );
+                      default:return Text("error");
+                    }
+
+                  },
+                ),
+              ),
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: submitForm,

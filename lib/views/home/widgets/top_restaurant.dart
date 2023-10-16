@@ -1,17 +1,14 @@
-import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:foodpanda_clone/views/DetailRestaurant/detailRetaurant.dart';
-import 'package:foodpanda_clone/views/home/widgets/insert.dart';
-import 'package:foodpanda_clone/views/home/widgets/update.dart';
+import 'package:foodpanda_clone/views/add_restaurant/add_restaurant.dart';
 import 'package:http/http.dart' as http;
+
+import '../../../models/response/restaurant_model.dart';
+import '../../add_restaurant/insert.dart';
 class TopRestaurant extends StatefulWidget {
-  final idpass;
-  final item;
-  final refreshCallback;
-  const TopRestaurant({
-    required this.item,
-    required this.idpass,
-    required this.refreshCallback,
+  RestaurantData restaurantData;
+  TopRestaurant({
+    required this.restaurantData,
     super.key,
   });
   @override
@@ -19,22 +16,19 @@ class TopRestaurant extends StatefulWidget {
 }
 
 class _TopRestaurantState extends State<TopRestaurant> {
-  Future<void> deleteRestaurant(int id) async {
-    final response = await http.delete(
-      Uri.parse('https://cms.istad.co/api/food-panda-restaurants/$id'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-    if (response.statusCode == 200) {
-      // Delete operation successful, trigger data refresh
-      setState(() {
-        widget.refreshCallback;
-      });
-    } else {
-      // Handle the error case
-    }
-  }
+  // Future<void> deleteRestaurant(int id) async {
+  //   final response = await http.delete(
+  //     Uri.parse('https://cms.istad.co/api/food-panda-restaurants/$id'),
+  //     headers: <String, String>{
+  //       'Content-Type': 'application/json; charset=UTF-8',
+  //     },
+  //   );
+  //   if (response.statusCode == 200) {
+  //     // Delete operation successful, trigger data refresh
+  //   } else {
+  //     // Handle the error case
+  //   }
+  // }
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -59,27 +53,27 @@ class _TopRestaurantState extends State<TopRestaurant> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  RestaurantForm(refreshCallback: widget.refreshCallback,)));
+                                  AddRestaurant()));
                     },
                   ),
                   ListTile(
                     leading:  const Icon(Icons.remove_circle_outline_outlined,size: 30),
                     title: const Text('Delete',style: TextStyle(fontSize: 20)),
                     onTap: ()async {
-                      if (await confirm(context)) {
-                         return deleteRestaurant(widget.idpass!);
-                      }
+                      // if (await confirm(context)) {
+                      //    return deleteRestaurant(widget.idpass!);
+                      // }
                     },
                   ),
                   ListTile(
                     leading:  const Icon(Icons.draw_outlined,size: 30,),
                     title:  const Text('Update',style: TextStyle(fontSize: 20)),
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  UpdateRestaurantForm(item: widget.item,idpass: widget.idpass,)));
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) =>
+                      //             UpdateRestaurantForm(item: widget.item,idpass: widget.idpass,imgid:widget.imgid)));
                     },
                   ),
                 ],
@@ -87,8 +81,8 @@ class _TopRestaurantState extends State<TopRestaurant> {
             });
       },
       child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: 200,
+        width: MediaQuery.of(context).size.width*.8,
+        height: 150,
         alignment: Alignment.centerLeft,
         child: Container(
           margin: const EdgeInsets.all(10),
@@ -112,7 +106,7 @@ class _TopRestaurantState extends State<TopRestaurant> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: Image.network(
-                                'https://cms.istad.co${widget.item?.picture?.data?.attributes?.url}',
+                                'https://cms.istad.co${widget.restaurantData.attributes?.picture?.data?.attributes?.url}',
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -147,7 +141,7 @@ class _TopRestaurantState extends State<TopRestaurant> {
                               child: Padding(
                                   padding: const EdgeInsets.all(5),
                                   child: Text(
-                                    "${widget.item?.deliveryTime} mn",
+                                    "${widget.restaurantData.attributes?.deliveryTime} mn",
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87),
@@ -160,7 +154,7 @@ class _TopRestaurantState extends State<TopRestaurant> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10.0),
                     child: Text(
-                      "${widget.item?.name}",
+                      "${widget.restaurantData.attributes?.name}",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 17
@@ -171,7 +165,7 @@ class _TopRestaurantState extends State<TopRestaurant> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10.0),
                     child: Text(
-                      "\$\$\$ ${widget.item?.category}",
+                      "\$\$\$ ${widget.restaurantData.attributes?.category}",
                       style: const TextStyle(
                         fontSize: 16
                       ),
@@ -182,7 +176,7 @@ class _TopRestaurantState extends State<TopRestaurant> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10.0),
                     child: Text(
-                      "\$ ${widget.item?.deliveryFee.toString()} delivery fee",
+                      "\$ ${widget.restaurantData.attributes?.deliveryFee.toString()} delivery fee",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16

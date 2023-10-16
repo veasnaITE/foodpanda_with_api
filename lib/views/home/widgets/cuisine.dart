@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 
 class Cuisines extends StatefulWidget {
   final items;
+  final uri;
 const Cuisines({
     super.key, required this.items,
+  required this.uri
   });
 
   @override
@@ -22,7 +24,7 @@ class _CuisinesState extends State<Cuisines> {
               borderRadius: BorderRadius.circular(15),
               color: Colors.grey[100]
           ),
-          child: Image.network('https://bobakingusa.com/wp-content/uploads/2020/09/oolongmilktea-1.png'),
+         child: Image.network('https://cms.istad.co${widget.uri}'),
         ),
         Text("${widget.items?.title}",
           style: const TextStyle(

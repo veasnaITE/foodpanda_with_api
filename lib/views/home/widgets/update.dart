@@ -7,7 +7,8 @@ import 'package:http/http.dart' as http;
 class UpdateRestaurantForm extends StatefulWidget {
   final item;
   final idpass;
-  UpdateRestaurantForm({required this.item, required this.idpass,super.key});
+  final imgid;
+  UpdateRestaurantForm({required this.item, required this.idpass, required this.imgid,super.key});
   @override
   _UpdateRestaurantForm createState() => _UpdateRestaurantForm();
 }
@@ -64,7 +65,7 @@ class _UpdateRestaurantForm extends State<UpdateRestaurantForm> {
       return widget.item?.picture?.id;
     }
   }
-  Future<void> inSertData (jsonData) async{
+  Future<void> updateDate (jsonData) async{
     var headers = {
       'Content-Type': 'application/json'
     };
@@ -88,10 +89,10 @@ class _UpdateRestaurantForm extends State<UpdateRestaurantForm> {
       int discount = int.parse(discountController.text);
       double deliveryFee = double.parse(deliveryFeeController.text);
       int deliveryTime = int.parse(deliveryTimeController.text);
-
       // You can perform further actions with the form data and the selected image here
       //posting Image
-      var id =await uploadImage(images!.path);
+      var ids = images != null ? await uploadImage(images!.path) : widget.imgid;
+      print(ids);
       //positing restaurant
       RestaurantInsertModel restaurantData = RestaurantInsertModel(
         data: Data(
@@ -100,28 +101,27 @@ class _UpdateRestaurantForm extends State<UpdateRestaurantForm> {
           discount: discount,
           deliveryFee: deliveryFee,
           deliveryTime: deliveryTime,
-          picture: "$id",
+          picture: "$ids",
         ),
       );
       String jsonData = restaurantInsertModelToJson(restaurantData);
       print(jsonData);
       //future insertdata
-      inSertData(jsonData);
+      updateDate(jsonData);
       // Reset the form
       _formKey.currentState!.reset();
-
-      // Clear the text field controllers
-      nameController.clear();
-      categoryController.clear();
-      discountController.clear();
-      deliveryFeeController.clear();
-      deliveryTimeController.clear();
-      // Clear the image selection
-      setState(() {
-        images = null;
-      });
-      Navigator.of(context).pop();
-    }
+    // Clear the text field controllers
+    nameController.clear();
+    categoryController.clear();
+    discountController.clear();
+    deliveryFeeController.clear();
+    deliveryTimeController.clear();
+    // Clear the image selection
+    setState(() {
+    images = null;
+    });
+    Navigator.of(context).pop();
+  }
   }
 
   @override

@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:foodpanda_clone/cuisines.dart';
+import 'package:foodpanda_clone/data/response/status.dart';
 import 'package:foodpanda_clone/get_model.dart';
-import 'package:foodpanda_clone/views/DetailRestaurant/detailRetaurant.dart';
+import 'package:foodpanda_clone/viewmodels/cuisine_view_model.dart';
+import 'package:foodpanda_clone/viewmodels/restaurant_viewmodel.dart';
 import 'package:foodpanda_clone/views/home/widgets/cuisine.dart';
 import 'package:foodpanda_clone/views/home/widgets/cus_sliverbanner.dart';
 import 'package:foodpanda_clone/views/home/widgets/gridfood.dart';
@@ -14,6 +16,7 @@ import 'package:foodpanda_clone/views/home/widgets/slidercardthree.dart';
 import 'package:foodpanda_clone/views/home/widgets/top_restaurant.dart';
 import 'package:foodpanda_clone/views/home/widgets/voucher.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? refreshCallback;
@@ -38,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 late Future<CuisinesModel> futureCuisines;
   Future<CuisinesModel> fetchCuisines() async{
-    final res = await http.get(Uri.parse('https://cms.istad.co/api/food-panda-cuisines'));
+    final res = await http.get(Uri.parse('https://cms.istad.co/api/food-panda-cuisines?populate=%2A'));
     if(res.statusCode ==200){
       return cuisinesModelFromJson(res.body);
     }else{
@@ -47,16 +50,21 @@ late Future<CuisinesModel> futureCuisines;
   }
 
   void handleDataRefresh() {
-    // Perform data refresh on this page
-    fetchRestaurantData();
+   setState(() {
+     fetchRestaurantData();
+   });
   }
 
+  final _restaurantViewModel = RestaurantViewModel();
+  final _cuisineViewModel = CuisineViewModel();
   @override
   void initState() {
     super.initState();
+    _restaurantViewModel.getAllRestaurant();
+    _cuisineViewModel.getAllCuisines();
+    widget.refreshCallback?.call();
     futureRestaurant = fetchRestaurantData();
     futureCuisines = fetchCuisines();
-    widget.refreshCallback?.call();
   }
   @override
   Widget build(BuildContext context) {
@@ -121,43 +129,32 @@ late Future<CuisinesModel> futureCuisines;
           SliverToBoxAdapter(
             child: SizedBox(
               height: 350,
-                child: FutureBuilder<RestaurantModel>(
-                future: futureRestaurant,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(snapshot.error.toString()),
-                    );
-                  }
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(snapshot.error.toString()),
-                    );
-                  }
-                  if (snapshot.hasData) {
-                    return ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemCount: snapshot.data!.data!.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final item = snapshot.data!.data![index].attributes;
-                        final idpass = snapshot.data!.data![index].id?.toInt();
-                        return TopRestaurant(idpass: idpass,item: item,refreshCallback: handleDataRefresh);
-                      },
-                    );
-                  }
-                  return const Center(
-                    child: Text('No data available.'),
-                  );
-                },
+               child: ChangeNotifierProvider(
+                 create: (context)=>_restaurantViewModel,
+                 child: Consumer<RestaurantViewModel>(
+                     builder: (context,viewModel,_){
+                       switch(viewModel.response.status!){
+                         case Status.LOADING:
+                           return CircularProgressIndicator();
+                         case Status.COMPlETED:
+                           return ListView.builder(
+                             scrollDirection: Axis.horizontal,
+                             shrinkWrap: true,
+                             itemCount: viewModel.response.data!.data!.length,
+                             itemBuilder: (BuildContext context, int index) {
+                               final item = viewModel.response.data!.data![index];
+                               return TopRestaurant(restaurantData: item,);
+                             },
+                           );
+                         case Status.ERROR:
+                           return const Text("Error");
+                         default: return const Text('Hello from TopRestaurant');
+                       }
+                     },
+                   ),
+               ),
               ),
-            )
-          ),
+            ),
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.only(left: 20,bottom: 20),
@@ -171,40 +168,31 @@ late Future<CuisinesModel> futureCuisines;
            SliverToBoxAdapter(
              child:SizedBox(
                height: 340,
-               child:FutureBuilder<CuisinesModel>(
-                 future: futureCuisines,
-                 builder: (context, snapshot) {
-                   if (snapshot.connectionState == ConnectionState.waiting) {
-                     return const Center(
-                       child: CircularProgressIndicator(),
-                     );
-                   }
-                   if (snapshot.hasError) {
-                     return Center(
-                       child: Text(snapshot.error.toString()),
-                     );
-                   }
-                   if (snapshot.hasError) {
-                     return Center(
-                       child: Text(snapshot.error.toString()),
-                     );
-                   }
-                   if (snapshot.hasData) {
-                     return  GridView.builder(
-                         scrollDirection: Axis.horizontal,
-                         itemCount: snapshot.data!.data!.length,
-                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-                         itemBuilder: (context, index) {
-                           final item = snapshot.data!.data![index].attributes;
-                           return Cuisines(items: item,);
-                         }
-                     );
-                   }
-                   return const Center(
-                     child: Text('No data available.'),
-                   );
-                 },
-               ),
+               child:ChangeNotifierProvider(
+                 create: (context)=>_cuisineViewModel,
+                 child: Consumer<CuisineViewModel>(
+                   builder: (context,viewModel,_){
+                     switch(viewModel.response.status!){
+                       case Status.LOADING:
+                         return CircularProgressIndicator();
+                       case Status.COMPlETED:
+                         return  GridView.builder(
+                             scrollDirection: Axis.horizontal,
+                             itemCount: viewModel.response.data!.data!.length,
+                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                             itemBuilder: (context, index) {
+                               final item = viewModel.response.data!.data![index].attributes;
+                               final url = viewModel.response.data!.data![index].attributes?.thumbnail?.data?.attributes?.url;
+                               return Cuisines(items: item,uri:url);
+                             }
+                         );
+                       case Status.ERROR:
+                         return const Text("Error Fething Cuisine");
+                       default: return const Text('Hello from Cuisine');
+                     }
+                   },
+                 ),
+               )
              ),
            ),
            const SliverToBoxAdapter(
@@ -371,7 +359,15 @@ late Future<CuisinesModel> futureCuisines;
               ),
             ),
           ),
-        ],
+        ],),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (BuildContext context) => widget),
+          );
+        },
+        child: Icon(Icons.refresh),
       ),
     );
   }

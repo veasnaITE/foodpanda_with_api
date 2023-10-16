@@ -42,6 +42,7 @@ dependencies:
   http:
   image_picker:
   confirm_dialog:
+  provider:
 
 
 dev_dependencies:
