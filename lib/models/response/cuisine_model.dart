@@ -1,22 +1,22 @@
 // To parse this JSON data, do
 //
-//     final cuisineModel = cuisineModelFromJson(jsonString);
+//     final cuisinesModel = cuisinesModelFromJson(jsonString);
 
 import 'dart:convert';
 
-CuisineModel cuisineModelFromJson(String str) => CuisineModel.fromJson(json.decode(str));
+CuisinesModel cuisinesModelFromJson(String str) => CuisinesModel.fromJson(json.decode(str));
 
-String cuisineModelToJson(CuisineModel data) => json.encode(data.toJson());
+String cuisinesModelToJson(CuisinesModel data) => json.encode(data.toJson());
 
-class CuisineModel {
-  List<CuisineData>? data;
+class CuisinesModel {
+  List<Datum>? data;
 
-  CuisineModel({
+  CuisinesModel({
     this.data,
   });
 
-  factory CuisineModel.fromJson(Map<String, dynamic> json) => CuisineModel(
-    data: json["data"] == null ? [] : List<CuisineData>.from(json["data"]!.map((x) => CuisineData.fromJson(x))),
+  factory CuisinesModel.fromJson(Map<String, dynamic> json) => CuisinesModel(
+    data: json["data"] == null ? [] : List<Datum>.from(json["data"]!.map((x) => Datum.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -24,16 +24,16 @@ class CuisineModel {
   };
 }
 
-class CuisineData {
+class Datum {
   int? id;
   DatumAttributes? attributes;
 
-  CuisineData({
+  Datum({
     this.id,
     this.attributes,
   });
 
-  factory CuisineData.fromJson(Map<String, dynamic> json) => CuisineData(
+  factory Datum.fromJson(Map<String, dynamic> json) => Datum(
     id: json["id"],
     attributes: json["attributes"] == null ? null : DatumAttributes.fromJson(json["attributes"]),
   );
@@ -46,32 +46,44 @@ class CuisineData {
 
 class DatumAttributes {
   String? title;
-  AttributesThumbnail? thumbnail;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  DateTime? publishedAt;
+  Thumbnail? thumbnail;
 
   DatumAttributes({
     this.title,
+    this.createdAt,
+    this.updatedAt,
+    this.publishedAt,
     this.thumbnail,
   });
 
   factory DatumAttributes.fromJson(Map<String, dynamic> json) => DatumAttributes(
     title: json["title"],
-    thumbnail: json["thumbnail"] == null ? null : AttributesThumbnail.fromJson(json["thumbnail"]),
+    createdAt: json["createdAt"] == null ? null : DateTime.parse(json["createdAt"]),
+    updatedAt: json["updatedAt"] == null ? null : DateTime.parse(json["updatedAt"]),
+    publishedAt: json["publishedAt"] == null ? null : DateTime.parse(json["publishedAt"]),
+    thumbnail: json["thumbnail"] == null ? null : Thumbnail.fromJson(json["thumbnail"]),
   );
 
   Map<String, dynamic> toJson() => {
     "title": title,
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
+    "publishedAt": publishedAt?.toIso8601String(),
     "thumbnail": thumbnail?.toJson(),
   };
 }
 
-class AttributesThumbnail {
+class Thumbnail {
   Data? data;
 
-  AttributesThumbnail({
+  Thumbnail({
     this.data,
   });
 
-  factory AttributesThumbnail.fromJson(Map<String, dynamic> json) => AttributesThumbnail(
+  factory Thumbnail.fromJson(Map<String, dynamic> json) => Thumbnail(
     data: json["data"] == null ? null : Data.fromJson(json["data"]),
   );
 
@@ -102,52 +114,144 @@ class Data {
 
 class DataAttributes {
   String? name;
+  dynamic alternativeText;
+  dynamic caption;
+  int? width;
+  int? height;
   Formats? formats;
+  String? hash;
+  String? ext;
+  String? mime;
+  double? size;
+  String? url;
+  dynamic previewUrl;
+  String? provider;
+  dynamic providerMetadata;
+  DateTime? createdAt;
+  DateTime? updatedAt;
 
   DataAttributes({
     this.name,
+    this.alternativeText,
+    this.caption,
+    this.width,
+    this.height,
     this.formats,
+    this.hash,
+    this.ext,
+    this.mime,
+    this.size,
+    this.url,
+    this.previewUrl,
+    this.provider,
+    this.providerMetadata,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory DataAttributes.fromJson(Map<String, dynamic> json) => DataAttributes(
     name: json["name"],
+    alternativeText: json["alternativeText"],
+    caption: json["caption"],
+    width: json["width"],
+    height: json["height"],
     formats: json["formats"] == null ? null : Formats.fromJson(json["formats"]),
+    hash: json["hash"],
+    ext: json["ext"],
+    mime: json["mime"],
+    size: json["size"]?.toDouble(),
+    url: json["url"],
+    previewUrl: json["previewUrl"],
+    provider: json["provider"],
+    providerMetadata: json["provider_metadata"],
+    createdAt: json["createdAt"] == null ? null : DateTime.parse(json["createdAt"]),
+    updatedAt: json["updatedAt"] == null ? null : DateTime.parse(json["updatedAt"]),
   );
 
   Map<String, dynamic> toJson() => {
     "name": name,
+    "alternativeText": alternativeText,
+    "caption": caption,
+    "width": width,
+    "height": height,
     "formats": formats?.toJson(),
+    "hash": hash,
+    "ext": ext,
+    "mime": mime,
+    "size": size,
+    "url": url,
+    "previewUrl": previewUrl,
+    "provider": provider,
+    "provider_metadata": providerMetadata,
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
   };
 }
 
 class Formats {
-  FormatsThumbnail? thumbnail;
+  Small? small;
+  Small? thumbnail;
 
   Formats({
+    this.small,
     this.thumbnail,
   });
 
   factory Formats.fromJson(Map<String, dynamic> json) => Formats(
-    thumbnail: json["thumbnail"] == null ? null : FormatsThumbnail.fromJson(json["thumbnail"]),
+    small: json["small"] == null ? null : Small.fromJson(json["small"]),
+    thumbnail: json["thumbnail"] == null ? null : Small.fromJson(json["thumbnail"]),
   );
 
   Map<String, dynamic> toJson() => {
+    "small": small?.toJson(),
     "thumbnail": thumbnail?.toJson(),
   };
 }
 
-class FormatsThumbnail {
+class Small {
+  String? ext;
   String? url;
+  String? hash;
+  String? mime;
+  String? name;
+  dynamic path;
+  double? size;
+  int? width;
+  int? height;
 
-  FormatsThumbnail({
+  Small({
+    this.ext,
     this.url,
+    this.hash,
+    this.mime,
+    this.name,
+    this.path,
+    this.size,
+    this.width,
+    this.height,
   });
 
-  factory FormatsThumbnail.fromJson(Map<String, dynamic> json) => FormatsThumbnail(
+  factory Small.fromJson(Map<String, dynamic> json) => Small(
+    ext: json["ext"],
     url: json["url"],
+    hash: json["hash"],
+    mime: json["mime"],
+    name: json["name"],
+    path: json["path"],
+    size: json["size"]?.toDouble(),
+    width: json["width"],
+    height: json["height"],
   );
 
   Map<String, dynamic> toJson() => {
+    "ext": ext,
     "url": url,
+    "hash": hash,
+    "mime": mime,
+    "name": name,
+    "path": path,
+    "size": size,
+    "width": width,
+    "height": height,
   };
 }

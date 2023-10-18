@@ -2,19 +2,64 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:foodpanda_clone/data/app_exception.dart';
-import 'package:foodpanda_clone/res/app_url.dart';
+import 'package:foodpanda_clone/models/response/image_resquest.dart';
 import 'package:http/http.dart' as http;
 class ApiService {
   dynamic responseJson;
-  Future<dynamic> uploadImageService(url, file) async{
-    var request = http.MultipartRequest('POST', Uri.parse(AppUrl.uploadImg));
-    request.files.add(await http.MultipartFile.fromPath('files', file));
-    http.StreamedResponse response = await request.send();
+
+  Future<dynamic> deleteApi(url) async {
+    var request = http.Request('DELETE', Uri.parse(url));
+    var response = await request.send();
     if (response.statusCode == 200) {
-      print("hiihoif");
-      print(await response.stream.bytesToString());
+      // print(await response.stream.bytesToString());
+      return true;
+    } else {
+      // print(response.reasonPhrase);
+      return false;
     }
-    else {
+  }
+
+  Future putApi(String url, requestBody) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request('PUT', Uri.parse(url));
+    request.body = json.encode(requestBody);
+    request.headers.addAll(headers);
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      // print(await response.stream.bytesToString());
+      return true;
+    } else {
+      // print(response.reasonPhrase);
+      return false;
+    }
+  }
+
+  Future postApi(String url, requestBody) async {
+    var headers = {'Content-Type': 'application/json'};
+    var request = http.Request('POST', Uri.parse(url));
+    request.body = json.encode(requestBody);
+    request.headers.addAll(headers);
+    var response = await request.send();
+  print('statusu ${response.statusCode}');
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      return true;
+    } else {
+      print(response.reasonPhrase);
+      return false;
+    }
+  }
+
+  Future uploadImage(String url, file) async {
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    request.files.add(await http.MultipartFile.fromPath('files', file));
+    var response = await request.send();
+    if (response.statusCode == 200) {
+      final res = await response.stream.bytesToString();
+      var imageList = imageModelFromJson(res);
+      print( imageList[0]);
+      return imageList[0];
+    } else {
       print(response.reasonPhrase);
     }
   }

@@ -4,13 +4,13 @@ import 'package:foodpanda_clone/res/app_url.dart';
 
 class ImageRepository{
   final _apiService = ApiService();
-  Future<ImageModel> uploadImage(file)async{
+  Future<ImageModel> uploadImage(file) async{
     try{
-     dynamic responses = await _apiService.uploadImageService(AppUrl.uploadImg, file);
-     print('image res: ${ImageModel.fromJson(responses)}');
-     return responses;
+      dynamic response = await _apiService.uploadImage(AppUrl.uploadImg, file);
+      print(response);
+      return response;
     }catch(e){
-      rethrow ;
+      rethrow;
     }
   }
 }

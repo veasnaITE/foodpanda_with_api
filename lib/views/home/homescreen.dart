@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:foodpanda_clone/cuisines.dart';
 import 'package:foodpanda_clone/data/response/status.dart';
-import 'package:foodpanda_clone/get_model.dart';
+import 'package:foodpanda_clone/models/response/restaurant_model.dart';
 import 'package:foodpanda_clone/viewmodels/cuisine_view_model.dart';
 import 'package:foodpanda_clone/viewmodels/restaurant_viewmodel.dart';
 import 'package:foodpanda_clone/views/home/widgets/cuisine.dart';
@@ -15,7 +14,6 @@ import 'package:foodpanda_clone/views/home/widgets/slidercardone.dart';
 import 'package:foodpanda_clone/views/home/widgets/slidercardthree.dart';
 import 'package:foodpanda_clone/views/home/widgets/top_restaurant.dart';
 import 'package:foodpanda_clone/views/home/widgets/voucher.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -29,32 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late Future<RestaurantModel> futureRestaurant;
 
-  Future<RestaurantModel> fetchRestaurantData() async {
-    final response = await http.get(Uri.parse(
-        'https://cms.istad.co/api/food-panda-restaurants?populate=*'));
-    if (response.statusCode == 200) {
-      return restaurantModelFromJson(response.body);
-    } else {
-      // Handle the error case
-      throw Exception('Failed to fetch restaurant data');
-    }
-  }
-late Future<CuisinesModel> futureCuisines;
-  Future<CuisinesModel> fetchCuisines() async{
-    final res = await http.get(Uri.parse('https://cms.istad.co/api/food-panda-cuisines?populate=%2A'));
-    if(res.statusCode ==200){
-      return cuisinesModelFromJson(res.body);
-    }else{
-      throw Exception("Failed to fetch Cuisines");
-    }
-  }
-
-  void handleDataRefresh() {
-   setState(() {
-     fetchRestaurantData();
-   });
-  }
-
   final _restaurantViewModel = RestaurantViewModel();
   final _cuisineViewModel = CuisineViewModel();
   @override
@@ -63,8 +35,6 @@ late Future<CuisinesModel> futureCuisines;
     _restaurantViewModel.getAllRestaurant();
     _cuisineViewModel.getAllCuisines();
     widget.refreshCallback?.call();
-    futureRestaurant = fetchRestaurantData();
-    futureCuisines = fetchCuisines();
   }
   @override
   Widget build(BuildContext context) {
@@ -167,7 +137,7 @@ late Future<CuisinesModel> futureCuisines;
           ),
            SliverToBoxAdapter(
              child:SizedBox(
-               height: 340,
+               height: 400,
                child:ChangeNotifierProvider(
                  create: (context)=>_cuisineViewModel,
                  child: Consumer<CuisineViewModel>(

@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:foodpanda_clone/data/response/api_response.dart';
+import 'package:foodpanda_clone/data/response/status.dart';
 import 'package:foodpanda_clone/repositories/image_repository.dart';
 
 class ImageViewModel extends ChangeNotifier {
   final _imageRepo = ImageRepository();
-  ApiResponse<dynamic> response = ApiResponse.loading();
-
-  void setImage(ApiResponse<dynamic> response) {
-    this.response = response;
+  dynamic image = ApiResponse();
+  setImageResponse(response){
+    if(response.data == null) {
+      image.status = Status.LOADING;
+    } else{
+      image = response;
+    }
     notifyListeners();
   }
-
-  Future<dynamic> uploadImage(dynamic file) async {
+  Future<dynamic> uploadImage(file) async {
+    setImageResponse(ApiResponse.loading());
     await _imageRepo.uploadImage(file)
-        .then((value) => setImage(ApiResponse.completed(value)))
-        .onError((error, stackTrace) => setImage(ApiResponse.error(stackTrace.toString())));
+        .then((image) => setImageResponse(ApiResponse.completed(image)))
+        .onError((error, stackTrace) => setImageResponse(ApiResponse.error(error.toString())));
   }
+
 }

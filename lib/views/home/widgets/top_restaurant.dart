@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:foodpanda_clone/data/response/status.dart';
+import 'package:foodpanda_clone/viewmodels/restaurant_viewmodel.dart';
 import 'package:foodpanda_clone/views/DetailRestaurant/detailRetaurant.dart';
-import 'package:foodpanda_clone/views/add_restaurant/add_restaurant.dart';
-import 'package:http/http.dart' as http;
-
+import 'package:provider/provider.dart';
 import '../../../models/response/restaurant_model.dart';
 import '../../add_restaurant/insert.dart';
+import '../../update_restaurant/update_restaurant.dart';
 class TopRestaurant extends StatefulWidget {
   RestaurantData restaurantData;
   TopRestaurant({
@@ -16,19 +17,7 @@ class TopRestaurant extends StatefulWidget {
 }
 
 class _TopRestaurantState extends State<TopRestaurant> {
-  // Future<void> deleteRestaurant(int id) async {
-  //   final response = await http.delete(
-  //     Uri.parse('https://cms.istad.co/api/food-panda-restaurants/$id'),
-  //     headers: <String, String>{
-  //       'Content-Type': 'application/json; charset=UTF-8',
-  //     },
-  //   );
-  //   if (response.statusCode == 200) {
-  //     // Delete operation successful, trigger data refresh
-  //   } else {
-  //     // Handle the error case
-  //   }
-  // }
+  var restaurantViewModel =RestaurantViewModel();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -53,27 +42,45 @@ class _TopRestaurantState extends State<TopRestaurant> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  AddRestaurant()));
+                                  RestaurantForm()));
                     },
                   ),
                   ListTile(
                     leading:  const Icon(Icons.remove_circle_outline_outlined,size: 30),
                     title: const Text('Delete',style: TextStyle(fontSize: 20)),
                     onTap: ()async {
-                      // if (await confirm(context)) {
-                      //    return deleteRestaurant(widget.idpass!);
-                      // }
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                        title: const Text('Are you sure to remove?'),
+                        actions: [
+                          TextButton(onPressed: (){
+                            Navigator.pop(context);
+                          }, child: const Text('No')),
+                          ChangeNotifierProvider(create: (context)=>restaurantViewModel,
+                          child: Consumer<RestaurantViewModel>(
+                              builder: (context, viewModel, _) {
+                                return TextButton(onPressed: (){
+                                  restaurantViewModel.deleteRestaurant(widget.restaurantData.id);
+                                },
+                                    child:  viewModel.response.status == Status.LOADING ?
+                                    const CircularProgressIndicator() :
+                                    const Text('Yes')
+                                );
+                              }
+                          ),)
+                        ],
+                      ));
                     },
                   ),
                   ListTile(
                     leading:  const Icon(Icons.draw_outlined,size: 30,),
                     title:  const Text('Update',style: TextStyle(fontSize: 20)),
                     onTap: () {
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (context) =>
-                      //             UpdateRestaurantForm(item: widget.item,idpass: widget.idpass,imgid:widget.imgid)));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RestaurantUpdateForm(data: widget.restaurantData,)));
                     },
                   ),
                 ],
